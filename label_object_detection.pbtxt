@@ -1,0 +1,60 @@
+item {
+  name: "n07739125"
+  id: 1
+  display_name: "Apple"
+}
+item {
+  name: "n07753592"
+  id: 2
+  display_name: "Banana"
+}
+item {
+  name: "n07745940"
+  id: 3
+  display_name: "Strawberry"
+}
+item {
+  name: "n07747607"
+  id: 4
+  display_name: "Orange"
+}
+item {
+  name: "n07749582"
+  id: 5
+  display_name: "Lemon"
+}
+item {
+  name: "n07753275"
+  id: 6
+  display_name: "Pineapple"
+}
+item {
+  name: "n07758680"
+  id: 7
+  display_name: "Grape"
+}
+item {
+  name: "n07764155"
+  id: 8
+  display_name: "Mango"
+}
+item {
+  name: "n07764847"
+  id: 9
+  display_name: "Avocado"
+}
+item {
+  name: "n07765361"
+  id: 10
+  display_name: "Guava"
+}
+item {
+  name: "n07767847"
+  id: 11
+  display_name: "Pear"
+}
+item {
+  name: "n07734017"
+  id: 12
+  display_name: "Tomato"
+}
