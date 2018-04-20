@@ -46,10 +46,31 @@ class fruit_feature(object):
 
 
 		features = []
+		center_coord = [0.5,0.5]
+		sigma = 0.7
+		print(classes,scores)
+		weight_fruits = []
 		for i in range(len(scores[0])):
 			if(scores[0][i]> 0.5):
 				print('Detected Fruit : ',category_index[classes[0][i]]['name'])
-				features.append(category_index[classes[0][i]]['feature'])
+
+				fruit_coord = [boxes[0][i][0], boxes[0][i][1]]
+
+				w=np.exp(-(np.linalg.norm(np.array(center_coord) - np.array(fruit_coord))) / sigma)
+				print(w)
+				weight_fruits.append(w)
+				result = map(lambda x: x * w, category_index[classes[0][i]]['feature'])
+				#print(list(result))
+				features.append(list(result))
+				#print(features)
+		#print(features,weight_fruits)
+		print((np.sum(features, axis=0) / len(features))/np.sum(weight_fruits))
+		return ((np.sum(features, axis=0) / len(features))/np.sum(weight_fruits))
+
+
+
+
+
 		return np.sum(features, axis=0)/len(features)
 
 

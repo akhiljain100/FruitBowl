@@ -4,6 +4,8 @@ from train_som import SOM
 from song_player import Song
 from generate_feature import fruit_feature
 import argparse
+import cv2
+import os
 
 parser = argparse.ArgumentParser(description="Fruit Bowl plays music")
 group = parser.add_mutually_exclusive_group()
@@ -20,37 +22,42 @@ class FruitBowl(object):
         self.model_path = model_path
         self.model = fruit_feature(self.model_path)
 
-        #Training SOM according to the song features
+        # Objects subject to selection
         self.song = Song(args.features_path)
         self.songs_feature = self.song.get_song_feature()
 
 
         # Train a 5x3 SOM with 400 iterations
-        self.som = SOM(20, 30, 5, 400)
-        self.som.train(self.songs_feature)
+        #self.som = SOM(20, 30, 5, 400)
+        #self.som.train(self.songs_feature)
 
         # Get output grid after training, weights of each neuron and their location
-        self.image_grid = np.asarray(self.som.get_centroids())
+        #self.image_grid = np.asarray(self.som.get_centroids())
 
 
 if __name__ == "__main__":
-    fruit_bowl = FruitBowl('Model_Inference/frozen_inference_graph.pb')
-    for i in range(10):
-        image_path = 'Images/image'+str(i)+'.jpg'
-        detected_feature= fruit_bowl.model.detect_image(image_path)
+        fruit_bowl = FruitBowl('Model_Inference/frozen_inference_graph.pb')
 
-        #Map fruits to their closest neurons
-        mapped = fruit_bowl.som.map_vects(detected_feature)
 
-        #Find index of the song which is closest to the detected neuron
-        min_index = min([j for j in range(len(fruit_bowl.songs_feature))],
-                            key=lambda x: np.linalg.norm(fruit_bowl.songs_feature[x]-
-                                                         fruit_bowl.image_grid[mapped[0], mapped[1],:]))
-        if args.verbose:
-            for i in range(len(fruit_bowl.songs_feature)):
-                print('Mapped neuron : ',fruit_bowl.image_grid[mapped[0], mapped[1],:])
-                print('song feature : ',fruit_bowl.songs_feature[i])
-                print('Distance : ',np.linalg.norm(fruit_bowl.songs_feature[i]-
-                                                             fruit_bowl.image_grid[mapped[0], mapped[1],:]))
-                print(fruit_bowl.song.get_song_name(min_index))
-        fruit_bowl.song.play_song(min_index,args.songs_path)
+
+        for filename in os.listdir('Images'):
+            print(filename)
+            image = cv2.imread(os.path.join('Images', filename))
+            if image is not None:
+                detected_feature= fruit_bowl.model.detect_image('Images/'+filename)
+
+                #Map fruits to their closest neurons
+                #mapped = fruit_bowl.som.map_vects(detected_feature)
+
+                #Find index of the song which is closest to the detected neuron
+                min_index = min([j for j in range(len(fruit_bowl.songs_feature))],
+                                    key=lambda x: np.linalg.norm(fruit_bowl.songs_feature[x]-
+                                                                 detected_feature))
+                if args.verbose:
+                    for i in range(len(fruit_bowl.songs_feature)):
+                        #print('Mapped neuron : ',fruit_bowl.image_grid[mapped[0], mapped[1],:])
+                        print('song feature : ',fruit_bowl.songs_feature[i])
+                        print('Distance : ',np.linalg.norm(fruit_bowl.songs_feature[i]-
+                                                                     detected_feature))
+                        print(fruit_bowl.song.get_song_name(min_index))
+                fruit_bowl.song.play_song(min_index,args.songs_path)
