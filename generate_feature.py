@@ -33,12 +33,13 @@ class fruit_feature(object):
 
 
 
-	def detect_image(self,image_path):
-		image = Image.open(image_path)
-		im_width, im_height = image.size
+	def detect_image(self,image):
+		#image = Image.open(image_path)
+
+		im_width, im_height,channel = image.shape
 		# the array based representation of the image will be used later in order to prepare the
 		# result image with boxes and labels on it.
-		image_np = np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
+		image_np = np.asarray(image)
 		image_np_expanded = np.expand_dims(image_np, axis=0)
 		(boxes, scores, classes, num) = self.sess.run(
 				[self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
@@ -53,9 +54,10 @@ class fruit_feature(object):
 		for i in range(len(scores[0])):
 			if(scores[0][i]> 0.5):
 				print('Detected Fruit : ',category_index[classes[0][i]]['name'])
+				
 
 				fruit_coord = [boxes[0][i][0], boxes[0][i][1]]
-
+				print(fruit_coord)
 				w=np.exp(-(np.linalg.norm(np.array(center_coord) - np.array(fruit_coord))) / sigma)
 				print(w)
 				weight_fruits.append(w)
@@ -64,14 +66,14 @@ class fruit_feature(object):
 				features.append(list(result))
 				#print(features)
 		#print(features,weight_fruits)
-		print((np.sum(features, axis=0) / len(features))/np.sum(weight_fruits))
+		#print((np.sum(features, axis=0) / len(features))/np.sum(weight_fruits))
 		return ((np.sum(features, axis=0) / len(features))/np.sum(weight_fruits))
 
 
 
 
 
-		return np.sum(features, axis=0)/len(features)
+		#return np.sum(features, axis=0)/len(features)
 
 
 

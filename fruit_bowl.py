@@ -37,27 +37,39 @@ class FruitBowl(object):
 
 if __name__ == "__main__":
         fruit_bowl = FruitBowl('Model_Inference/frozen_inference_graph.pb')
+        capturing = True
+        c = cv2.VideoCapture(1)
+        rubbish, original_frame = c.read()  # ret is useless
+        previous_frame = np.array([])
+        just_snapped = False
+        snapshot_flag = False
+        while (capturing):
+            ret, frame = c.read()
+            try:
+                diff = cv2.absdiff(frame, original_frame)
+                mean_diff = float(np.mean(diff))
+                print("mean diff", mean_diff)
+                if mean_diff < 180:
+                    detected_feature= fruit_bowl.model.detect_image(frame)
 
+                    #Map fruits to their closest neurons
+                    #mapped = fruit_bowl.som.map_vects(detected_feature)
 
+                    #Find index of the song which is closest to the detected neuron
+                    min_index = min([j for j in range(len(fruit_bowl.songs_feature))],
+                                    key=lambda x: np.linalg.norm(fruit_bowl.songs_feature[x]-detected_feature))
+                    if args.verbose:
+                        for i in range(len(fruit_bowl.songs_feature)):
+                            #print('Mapped neuron : ',fruit_bowl.image_grid[mapped[0], mapped[1],:])
+                            print('song feature : ',fruit_bowl.songs_feature[i])
+                            print('Distance : ',np.linalg.norm(fruit_bowl.songs_feature[i]-detected_feature))
+                            print(fruit_bowl.song.get_song_name(min_index))
+                            fruit_bowl.song.play_song(min_index, args.songs_path)
+            except IOError:
+                print('An error occured trying to read the file.')
 
-        for filename in os.listdir('Images'):
-            print(filename)
-            image = cv2.imread(os.path.join('Images', filename))
-            if image is not None:
-                detected_feature= fruit_bowl.model.detect_image('Images/'+filename)
+            except ValueError:
+                print('Non-numeric data found in the file.')
 
-                #Map fruits to their closest neurons
-                #mapped = fruit_bowl.som.map_vects(detected_feature)
-
-                #Find index of the song which is closest to the detected neuron
-                min_index = min([j for j in range(len(fruit_bowl.songs_feature))],
-                                    key=lambda x: np.linalg.norm(fruit_bowl.songs_feature[x]-
-                                                                 detected_feature))
-                if args.verbose:
-                    for i in range(len(fruit_bowl.songs_feature)):
-                        #print('Mapped neuron : ',fruit_bowl.image_grid[mapped[0], mapped[1],:])
-                        print('song feature : ',fruit_bowl.songs_feature[i])
-                        print('Distance : ',np.linalg.norm(fruit_bowl.songs_feature[i]-
-                                                                     detected_feature))
-                        print(fruit_bowl.song.get_song_name(min_index))
-                fruit_bowl.song.play_song(min_index,args.songs_path)
+            except ImportError:
+                print("NO module found")
