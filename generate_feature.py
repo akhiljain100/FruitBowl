@@ -40,7 +40,7 @@ class fruit_feature(object):
 
 
 	def detect_image(self,image):
-		#image = Image.open(image_path)
+		#image = Image.open('/home/badoo/Desktop/Figure_2.png')
 
 		#im_width, im_height,channel = image.shape
 		#image_np = load_image_into_numpy_array(Image.fromarray(image))
@@ -50,7 +50,7 @@ class fruit_feature(object):
 		image_np = np.asarray(image)
 		#pil_im = Image.fromarray(image)
 		image_np_expanded = np.expand_dims(image_np, axis=0)
-		#imgplot = plt.imshow(image_np_expanded)
+		#plt.imshow(image_np_expanded)
 		#plt.show()
 		print('here')
 		(boxes, scores, classes, num) = self.sess.run(
