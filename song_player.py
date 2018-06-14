@@ -2,13 +2,13 @@ import csv
 import pygame
 from pygame import mixer # Load the required library
 
-
 class Song(object):
     """docstring for ."""
     def __init__(self, filename):
         mixer.init()
         pygame.display.init()
         self._filename = filename
+        self.last_index = None
 
         self._songs = []
         with open(self._filename) as f:
@@ -45,11 +45,29 @@ class Song(object):
         #            if len ( sort_index ) > 0:       # If there are more tracks in the queue...
         #                mixer.music.queue ( songs_path+self.get_song_name(sort_index.pop(0)) ) # Queue the next on
     def play_song(self,index,songs_path):
+        print(index)
+        if self.last_index == None:
+            self.last_index = index
+        if mixer.music.get_busy() and index == self.last_index:
+            return
+        elif index is not self.last_index and mixer.music.get_busy():
+            mixer.music.fadeout(10)
+            self.last_index = index
+            self._song_name = self.get_song_name(index)
+            mixer.music.load(songs_path+self._song_name)
+            mixer.music.play()
+        else:
+            self.last_index = index
+            self._song_name = self.get_song_name(index)
+            mixer.music.load(songs_path + self._song_name)
+            mixer.music.play()
+        #t=Thread(name='music_player', target = mixer.music.play)
+        #        mixer.music.play()
+        #lock = threading.Lock()
+        #lock.acquire()
+        #t.start()
+        #lock.release()
 
-        self._song_name = self.get_song_name(index)
-
-        mixer.music.load(songs_path+self._song_name)
-        mixer.music.play()
         print('playing',self._song_name)
 
 
