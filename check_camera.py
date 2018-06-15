@@ -2,11 +2,11 @@
 import cv2
 import time
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 
-video_capture = cv2.VideoCapture(1)
+
+video_capture = cv2.VideoCapture(-1)
 count  = 0
 while(True):
 
@@ -23,5 +23,5 @@ while(True):
 
 rubbish, original_frame = video_capture.read()
 
-plt.imshow(original_frame)
-plt.show()
+#plt.imshow(original_frame)
+#plt.show()

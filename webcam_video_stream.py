@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-import matplotlib.pyplot as plt
+
+#import matplotlib.pyplot as plt
+import time
 import cv2
 from threading import Thread, Lock
 import numpy as np
@@ -7,7 +9,7 @@ from generate_feature import fruit_feature
 from song_player import Song
 
 class WebcamVideoStream :
-    def __init__(self, src = 1, width = 640, height = 480) :
+    def __init__(self, src = -1, width = 640, height = 480) :
         self.stream = cv2.VideoCapture(src)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
@@ -35,14 +37,17 @@ class WebcamVideoStream :
 
     def read(self) :
         self.read_lock.acquire()
-        frame = self.frame.copy()
+        if self.frame is not None:
+            frame = self.frame.copy()
+        else:
+            frame = None
         self.read_lock.release()
+
         return frame
 
     def stop(self) :
         self.started = False
         self.thread.join()
-
     def __exit__(self, exc_type, exc_value, traceback) :
         self.stream.release()
 
@@ -71,23 +76,30 @@ class detect_fruit :
 
     def detect(self) :
         while self.start_detecting :
+            if self.last_frame is None:
+                self.last_frame = self.read_image.read()
 
             frame = self.read_image.read()
-            if(self.last_frame is not None):
-                diff = cv2.absdiff(frame, self.last_frame)
-                mean_diff = float(np.mean(diff))
+
+            try:
+
+                    diff = cv2.absdiff(frame, self.last_frame)
+                    mean_diff = float(np.mean(diff))
+                    #print(mean_diff)
 
 
-                if mean_diff < 120:
-                    self.read_lock.acquire()
+                    if mean_diff < 12:
+                        self.read_lock.acquire()
 
-                    self.detected_feature = self.model.detect_image(frame)
+                        self.detected_feature = self.model.detect_image(frame)
+
+                        self.read_lock.release()
+                    else:
+                        print('Environment changed, discarding the image')
                     self.last_frame = frame
-                    self.read_lock.release()
-                else:
-                    print('Environment changed, discarding the image')
-            else:
-                self.last_frame = self.read_image.read()
+                    time.sleep(5)
+            except KeyboardInterrupt:
+                self.stop()
 
     def read_feature(self):
         #self.read_lock.acquire()
@@ -101,4 +113,5 @@ class detect_fruit :
     def stop(self) :
         self.start_detecting = False
         self.thread.join()
+
 

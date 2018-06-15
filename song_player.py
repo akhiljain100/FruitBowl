@@ -5,7 +5,7 @@ from pygame import mixer # Load the required library
 class Song(object):
     """docstring for ."""
     def __init__(self, filename):
-        mixer.init()
+        mixer.init(frequency=22050, size=-16, channels=2, buffer=4096)
         pygame.display.init()
         self._filename = filename
         self.last_index = None
@@ -51,7 +51,7 @@ class Song(object):
         if mixer.music.get_busy() and index == self.last_index:
             return
         elif index is not self.last_index and mixer.music.get_busy():
-            mixer.music.fadeout(10)
+            mixer.music.fadeout(1000)
             self.last_index = index
             self._song_name = self.get_song_name(index)
             mixer.music.load(songs_path+self._song_name)
