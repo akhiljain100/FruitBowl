@@ -35,7 +35,7 @@ class fruit_feature(object):
 				self.num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
 	def remove_overlap(self,box):
-		print(box)
+
 		to_remove = []
 		for x,y in itertools.combinations(box,2):
 				if (x == y).all():
@@ -48,7 +48,6 @@ class fruit_feature(object):
 				else:
 					continue
 
-		print('to_remove elements',to_remove)
 		return to_remove
 
 	def detect_image(self,image):
@@ -58,18 +57,33 @@ class fruit_feature(object):
 				[self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
 				feed_dict={self.image_tensor: image_np_expanded})
 		#print('original',boxes,scores)
+
 		box = []
 		for i in range(len(scores[0])):
 			if(scores[0][i]> 0.5):
-				box.append(np.append(boxes[0][i],scores[0][i]))
+				box.append(np.append(np.append(boxes[0][i],scores[0][i]),i))
 		to_remove = self.remove_overlap(box)
-		for i in range(len(boxes[0])):
-			for j in to_remove:
-				if(boxes[0][i].all() == j[0:4].all()):
-					print('here',i,boxes[0][i])
-					np.delete(boxes[0], i)
-					np.delete(scores[0], i)
-					np.delete(classes[0],i)
+		boxes = list(boxes[0])
+		scores = list(scores[0])
+		classes = list(classes[0])
+
+		for j in to_remove:
+			boxes.pop(int(j[5]))
+			scores.pop(int(j[5]))
+			classes.pop(int(j[5]))
+		print(len(boxes))
+		#for i in range(iter):
+		#	for j in to_remove:
+		#		c = list(boxes[0][i])
+		#		d = list(j[0:4])
+		#		print(c ,d)
+		#		if(c == d):
+		#			print('check',i)
+					#print('here',i,boxes[0][i])
+		#			np.delete(boxes, i,0)
+		#			np.delete(scores[0], i)
+		#			np.delete(classes[0],i)
+		#print(len(boxes[0]))
 		#for i in range(len(boxes)):
 		#	for j in to_remove:
 		#		print(j[0:4],boxes[0][i])
@@ -81,17 +95,19 @@ class fruit_feature(object):
 		features = []
 		center_coord = [0.5,0.5]
 		sigma = 0.5
-		print(classes,boxes,scores)
+		#print(classes,boxes,scores)
 		weight_fruits = []
-		for i in range(len(scores[0])):
-			if(scores[0][i]> 0.5):
-				print('Detected Fruit : ',category_index[classes[0][i]]['name'])
-				fruit_coord = [boxes[0][i][0], boxes[0][i][1]]
+		for i in range(len(scores)):
+			if(scores[i]> 0.5):
+				print('Detected Fruit : ',category_index[classes[i]]['name'])
+				fruit_coord = [boxes[i][0], boxes[i][1]]
 				#print(fruit_coord)
 				w=np.exp(-(np.linalg.norm(np.array(center_coord) - np.array(fruit_coord))) / sigma)
 				print('weight given to it',w)
 				weight_fruits.append(w)
-				result = map(lambda x: x * w, category_index[classes[0][i]]['feature'])
+				result = map(lambda x: x * w, category_index[classes[i]]['feature'])
 				features.append(list(result))
+		if(len(features) == 0):
+			return None
 		return ((np.sum(features, axis=0) / len(features))/np.sum(weight_fruits))
 

@@ -77,7 +77,7 @@ if __name__ == "__main__":
                         detected_feature = get_feature.read_feature()
                         #detected_feature = None
                         if(detected_feature is None):
-                            print('Initial environtment should be changed for playing the song')
+                            print('Please initiate the environment by adding fruits in it')
 
 
                         elif(np.linalg.norm(fruit_bowl.original_detected_feature-detected_feature)<0.2):
